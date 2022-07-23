@@ -1,0 +1,52 @@
+LISTA DE DATAS 
+
+(Periodo as text, DataInicial as date, DataFinal as date, Ordem as number) =>
+let
+    //Periodo = "Mês Atual",
+    //DataInicial = #date(2022,4,1),
+    //DataFinal = #date(2022,4,30),
+    //Ordem = 1,
+    QtdeDias = Duration.Days(DataFinal-DataInicial)+1,
+    ListaDatas = List.Dates(DataInicial,QtdeDias,#duration(1,0,0,0)),
+    TipoDados = type table[Data=date, Periodo=text, Ordem=number],
+    TabelaLista = 
+        List.Transform(
+            ListaDatas,
+            each 
+                { _ ,
+                Periodo,
+                Ordem}
+        ),
+    TabelaResultado = #table(TipoDados,TabelaLista) 
+in
+    TabelaResultado
+
+
+CONTEXTOS
+
+let
+    Hoje = Date.From(DateTime.LocalNow()),
+    Ontem = Date.AddDays(Hoje,-1),
+    InicioSemana = Date.StartOfWeek(Hoje),
+    FimSemana = Date.EndOfWeek(Hoje),
+    InicioMes = Date.StartOfMonth(Hoje),
+    FimMes = Date.EndOfMonth(Hoje),
+    InicioAno = Date.StartOfYear(Hoje),
+    FimAno = Date.EndOfYear(Hoje),
+    ListaPeriodos ={
+        { "Hoje", Hoje, Hoje, 1 },
+        { "Ontem", Ontem, Ontem, 2},
+        { "Esta Semana", InicioSemana, FimSemana, 3},
+        { "Semana Passada", Date.AddWeeks(InicioSemana,-1), Date.AddWeeks(FimSemana,-1), 4},
+        { "Últimos 7 Dias", Date.AddDays(Hoje,-7), Ontem, 5},
+        { "Este Mês", InicioMes, FimMes, 6},
+        { "Mês Passado", Date.AddMonths(InicioMes,-1), Date.AddMonths(FimMes,-1), 7},
+        { "Últimos 30 Dias", Date.AddDays(Hoje,-30), Ontem, 8},
+        { "Este Ano", InicioAno, FimAno, 9},
+        { "Ano Passado", Date.AddYears(InicioAno,-1), Date.AddYears(FimAno,-1), 10},
+        { "Últimos 90 Dias", Date.AddDays(Hoje,-90), Ontem, 11}
+    },
+    ListaTabela = List.Transform(ListaPeriodos, each fnPeriodos( _{0}, _{1}, _{2}, _{3})),
+    TabelaResultado = Table.Combine(ListaTabela)
+in
+    TabelaResultado
